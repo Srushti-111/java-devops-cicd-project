@@ -25,25 +25,30 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('SonarQube') {
-            sh '''
-                mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
-                -Dsonar.projectKey=$SONAR_PROJECT_KEY
-            '''
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
+                        -Dsonar.projectKey=$SONAR_PROJECT_KEY
+                    '''
+                }
+            }
         }
     }
-}
+
     post {
         always {
             archiveArtifacts artifacts: 'target/*.jar,target/*.war',
                              allowEmptyArchive: true
+
             junit testResults: 'target/surefire-reports/*.xml',
                   allowEmptyResults: true
         }
+
         success {
             echo 'Build and SonarQube analysis completed successfully.'
         }
+
         failure {
             echo 'Pipeline failed. Check the stage logs.'
         }
